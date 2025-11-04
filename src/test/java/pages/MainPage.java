@@ -64,25 +64,53 @@ public class MainPage {
         }
     }
 
+    public boolean isAnswerVisible(int index) {
+        List<WebElement> items = driver.findElements(faqItems);
+        if (index < 0 || index >= items.size()) {
+            return false;
+        }
+        WebElement item = items.get(index);
+        WebElement panel = item.findElement(faqPanel);
+
+        try {
+            return wait((short)2).until(ExpectedConditions.visibilityOf(panel)).isDisplayed();
+        } catch (TimeoutException e) {
+            return false;
+        }
+    }
+
+    public String getAnswerText(int index) {
+        List<WebElement> items = driver.findElements(faqItems);
+        if (index < 0 || index >= items.size()) {
+            throw new IllegalArgumentException("FAQ index out of bounds: " + index + ", total: " + items.size());
+        }
+        WebElement item = items.get(index);
+        WebElement panel = item.findElement(faqPanel);
+
+        wait((short)3).until(d -> {
+            String text = panel.getText().trim();
+            return !text.isEmpty() && panel.isDisplayed();
+        });
+
+        return panel.getText().trim();
+    }
+
     public String expandAndGetAnswer(int index) {
         List<WebElement> items = driver.findElements(faqItems);
         if (index < 0 || index >= items.size()) {
             throw new IllegalArgumentException("FAQ index out of bounds: " + index + ", total: " + items.size());
         }
-        WebElement item   = items.get(index);
+
+        WebElement item = items.get(index);
         WebElement button = item.findElement(faqButton);
-        WebElement panel  = item.findElement(faqPanel);
+        WebElement panel = item.findElement(faqPanel);
 
         scrollIntoViewAvoidSticky(button);
         safeClick(button);
 
         wait((short)3).until(ExpectedConditions.visibilityOf(panel));
-        String txt = panel.getText().trim();
-        if (txt.isBlank()) {
-            wait((short)2).until(d -> !panel.getText().trim().isBlank());
-            txt = panel.getText().trim();
-        }
-        return txt;
+
+        return getAnswerText(index);
     }
 
     public void startOrderFromTop() {

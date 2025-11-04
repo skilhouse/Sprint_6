@@ -150,7 +150,6 @@ public class OrderPage {
     }
 
     public void submitAndConfirm() {
-        // нажать «Заказать» в форме
         WebElement orderBtn = waitFor(5).until(ExpectedConditions.elementToBeClickable(orderButton));
         js().executeScript("arguments[0].scrollIntoView({block:'center'});", orderBtn);
         orderBtn.click();
